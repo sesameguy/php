@@ -1,12 +1,8 @@
-# Node.js
-base image: [node:buster](https://hub.docker.com/_/node)  
-[node's packages](#nodes-packages)  
+# PHP
+base image: [lorisleiva/laravel-docker](https://hub.docker.com/r/lorisleiva/laravel-docker/)  
 [cli tools](#cli-tools)
 
 ---
-
-## node's packages
-- [typescript](https://www.typescriptlang.org)
 
 ## cli tools
 - [bat](https://github.com/sharkdp/bat/releases)
@@ -19,21 +15,20 @@ base image: [node:buster](https://hub.docker.com/_/node)
 
 ## usage
 ```powershell
-function nd ([String]$src, [Int]$port) {
-    $bind = pathValidate $src | mountFolder "/node"
+function php ([String]$src = "~\php", [Int]$port) {
+    $bind = pathValidate $src | mountFolder "/php"
     $map = $port | ? { $_ -gt 0 -and ($_ -lt 65535) } | % { "-p $_" } # 0 < port < 65535
 
     iex "
         docker create ``
             -e TZ=Asia/Hong_Kong ``
-            -P ``
-            $bind ``
             $map ``
-            -v node:/root/.vscode-server/extensions ``
+            $bind ``
+            -v php:/root/.vscode-server/extensions ``
             --tmpfs /root/.cache ``
             --tmpfs /tmp ``
             -i ``
-            tmpac/node
+            tmpac/php
     "
 }
 

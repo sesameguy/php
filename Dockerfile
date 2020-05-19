@@ -1,12 +1,12 @@
 FROM lorisleiva/laravel-docker
 
-ARG bat_ver=0.15.0
+ARG bat_ver=0.15.1
 ARG diskus_ver=0.6.0
 ARG fd_ver=8.0.0
 ARG fzf_ver=0.21.1
 ARG hyperfine_ver=1.9.0
 ARG ripgrep_ver=12.1.0
-ARG starship_ver=0.41.0
+ARG starship_ver=0.41.3
 
 # Install laravel, phpcs
 RUN composer global require \
