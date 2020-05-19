@@ -1,8 +1,4 @@
-FROM php
-
-ENV COMPOSER_HOME /composer
-ENV PATH ./vendor/bin:/composer/vendor/bin:$PATH
-ENV COMPOSER_ALLOW_SUPERUSER 1
+FROM lorisleiva/laravel-docker
 
 ARG bat_ver=0.15.1
 ARG diskus_ver=0.6.0
@@ -12,43 +8,10 @@ ARG hyperfine_ver=1.9.0
 ARG ripgrep_ver=12.1.0
 ARG starship_ver=0.41.3
 
-RUN apt-get update \
-  && apt-get install -y ca-certificates curl wget gnupg dirmngr xz-utils libatomic1 --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/* \
-# Install PECL and PEAR extensions
-  && pecl install \
-    imagick \
-    xdebug \
-# Enable PECL and PEAR extensions
-  && docker-php-ext-enable \
-    imagick \
-    xdebug \
-# Configure php extensions
-  && docker-php-ext-configure gd --with-freetype --with-jpeg \
-# Install php extensions
-  && docker-php-ext-install \
-    bcmath \
-    calendar \
-    curl \
-    exif \
-    gd \
-    iconv \
-    intl \
-    mbstring \
-    pdo \
-    pdo_mysql \
-    pdo_pgsql \
-    pdo_sqlite \
-    pcntl \
-    tokenizer \
-    xml \
-    zip \
-# Install composer
-  && curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer \
-# Install laravel, PHP_CodeSniffer
-  && composer global require laravel/installer "squizlabs/php_codesniffer=*" \
-# Cleanup dev dependencies
-  && apk del -f .build-deps \
+# Install laravel, phpcs
+RUN composer global require \
+  laravel/installer \
+  squizlabs/php_codesniffer \
 # install bat
   && curl -fL -o bat.tar.gz "https://github.com/sharkdp/bat/releases/download/v${bat_ver}/bat-v${bat_ver}-x86_64-unknown-linux-musl.tar.gz" \
   && tar -xzvf bat.tar.gz -C /usr/local/bin --wildcards "*/bat" --strip-components 1 \
