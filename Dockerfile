@@ -1,4 +1,4 @@
-FROM php
+FROM php:alpine
 
 ENV COMPOSER_HOME /composer
 ENV PATH ./vendor/bin:/composer/vendor/bin:$PATH
@@ -6,23 +6,56 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 
 ARG bat_ver=0.15.1
 ARG diskus_ver=0.6.0
-ARG fd_ver=8.0.0
+ARG fd_ver=8.1.0
 ARG fzf_ver=0.21.1
 ARG hyperfine_ver=1.9.0
 ARG ripgrep_ver=12.1.0
 ARG starship_ver=0.41.3
 
-RUN apt-get update \
-  && apt-get install -y ca-certificates curl wget gnupg dirmngr xz-utils libatomic1 --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/* \
+# Install dev dependencies
+RUN apk add --no-cache --virtual .build-deps \
+    $PHPIZE_DEPS \
+    curl-dev \
+    imagemagick-dev \
+    libtool \
+    libxml2-dev \
+    postgresql-dev \
+    sqlite-dev \
+# Install production dependencies
+  && apk add --no-cache \
+    bash \
+    curl \
+    freetype-dev \
+    g++ \
+    gcc \
+    git \
+    icu-dev \
+    icu-libs \
+    imagemagick \
+    libc-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    libzip-dev \
+    make \
+    mysql-client \
+    nodejs \
+    nodejs-npm \
+    oniguruma-dev \
+    yarn \
+    openssh-client \
+    postgresql-libs \
+    rsync \
+    zlib-dev \
 # Install PECL and PEAR extensions
   && pecl install \
     imagick \
     xdebug \
+    ast \
 # Enable PECL and PEAR extensions
   && docker-php-ext-enable \
     imagick \
     xdebug \
+    ast \
 # Configure php extensions
   && docker-php-ext-configure gd --with-freetype --with-jpeg \
 # Install php extensions
@@ -46,7 +79,7 @@ RUN apt-get update \
 # Install composer
   && curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer \
 # Install laravel, PHP_CodeSniffer
-  && composer global require laravel/installer "squizlabs/php_codesniffer=*" \
+  && composer global require "squizlabs/php_codesniffer=*" \
 # Cleanup dev dependencies
   && apk del -f .build-deps \
 # install bat
