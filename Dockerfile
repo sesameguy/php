@@ -84,53 +84,51 @@ RUN apk add --no-cache --virtual .build-deps \
   && curl -fsSL --compressed -o node.tar.xz "https://unofficial-builds.nodejs.org/download/release/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64-musl.tar.xz" \
   && mkdir -p /opt/node \
   && tar -xJf "node.tar.xz" -C /opt/node --strip-components 1 --no-same-owner \
+  && node --version \
   && rm -f "node.tar.xz" \
 # Install Yarn
   && curl -fsSL --compressed -o yarn.tar.gz "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
   && mkdir -p /opt/yarn \
   && tar -xzf yarn.tar.gz -C /opt/yarn --strip-components 1 \
-  && ln -s /opt/yarn/bin/yarn /usr/local/bin/yarn \
-  && ln -s /opt/yarn/bin/yarnpkg /usr/local/bin/yarnpkg \
+  && ln -s /opt/yarn/bin/yarn /opt/node/bin/yarn \
+  && ln -s /opt/yarn/bin/yarnpkg /opt/node/bin/yarnpkg \
+  && yarn --version \
   && rm yarn.tar.gz \
+# Install typescript
+  && yarn global add typescript \
 # Cleanup dev dependencies
   && apk del -f .build-deps \
-# install bat
+# Install bat
   && curl -fL -o bat.tar.gz "https://github.com/sharkdp/bat/releases/download/v${bat_ver}/bat-v${bat_ver}-x86_64-unknown-linux-musl.tar.gz" \
   && tar -xzvf bat.tar.gz -C /usr/local/bin --wildcards "*/bat" --strip-components 1 \
   && rm bat.tar.gz \
-# bat smoke tests
   && bat --version \
-# install diskus
+# Install diskus
   && curl -fL -o diskus.tar.gz "https://github.com/sharkdp/diskus/releases/download/v${diskus_ver}/diskus-v${diskus_ver}-x86_64-unknown-linux-musl.tar.gz" \
   && tar -xzvf diskus.tar.gz -C /usr/local/bin --wildcards "*/diskus" --strip-components 1 \
   && rm diskus.tar.gz \
-# diskus smoke tests
   && diskus --version \
-# install fd
+# Install fd
   && curl -fL -o fd.tar.gz "https://github.com/sharkdp/fd/releases/download/v${fd_ver}/fd-v${fd_ver}-x86_64-unknown-linux-musl.tar.gz" \
   && tar -xzvf fd.tar.gz -C /usr/local/bin --wildcards "*/fd" --strip-components 1 \
   && rm fd.tar.gz \
-# fd smoke tests
   && fd --version \
-# install fzf
+# Install fzf
   && curl -fL -o fzf.tgz "https://github.com/junegunn/fzf-bin/releases/download/${fzf_ver}/fzf-${fzf_ver}-linux_amd64.tgz" \
   && tar -xzvf fzf.tgz -C /usr/local/bin \
   && rm fzf.tgz \
-# fzf smoke tests
   && fzf --version \
-# install hyperfine
+# Install hyperfine
   && curl -fL -o hyperfine.tar.gz "https://github.com/sharkdp/hyperfine/releases/download/v${hyperfine_ver}/hyperfine-v${hyperfine_ver}-x86_64-unknown-linux-musl.tar.gz" \
   && tar -xzvf hyperfine.tar.gz -C /usr/local/bin --wildcards "*/hyperfine" --strip-components 1 \
   && rm hyperfine.tar.gz \
-# hyperfine smoke tests
   && hyperfine --version \
-# install ripgrep
+# Install ripgrep
   && curl -fL -o ripgrep.tar.gz "https://github.com/BurntSushi/ripgrep/releases/download/${ripgrep_ver}/ripgrep-${ripgrep_ver}-x86_64-unknown-linux-musl.tar.gz" \
   && tar -xzvf ripgrep.tar.gz -C /usr/local/bin --wildcards "*/rg" --strip-components 1 \
   && rm ripgrep.tar.gz \
-# ripgrep smoke test
   && rg --version \
-# install starship
+# Install starship
   && curl -fL -o starship.tar.gz "https://github.com/starship/starship/releases/download/v${starship_ver}/starship-x86_64-unknown-linux-musl.tar.gz" \
   && tar -xzvf starship.tar.gz -C /usr/local/bin \
   && rm starship.tar.gz \
@@ -139,5 +137,7 @@ RUN apk add --no-cache --virtual .build-deps \
   && sed -i "s|DEFAULT@SECLEVEL=2|DEFAULT@SECLEVEL=1|g" /etc/ssl/openssl.cnf
 
 COPY starship.toml /root/.config
+
+EXPOSE 3000 8000 8080
 
 CMD [ "bash" ]
