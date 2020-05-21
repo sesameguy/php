@@ -1,9 +1,11 @@
 FROM php:alpine
 
 ENV COMPOSER_HOME /composer
-ENV PATH ./vendor/bin:/composer/vendor/bin:$PATH
+ENV PATH /opt/node/bin:/composer/vendor/bin:$PATH
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
+ARG NODE_VERSION=14.3.0
+ARG YARN_VERSION=1.22.4
 ARG bat_ver=0.15.1
 ARG diskus_ver=0.6.0
 ARG fd_ver=8.1.0
@@ -38,14 +40,12 @@ RUN apk add --no-cache --virtual .build-deps \
     libzip-dev \
     make \
     mysql-client \
-    nodejs \
-    nodejs-npm \
     oniguruma-dev \
-    yarn \
     openssh-client \
     postgresql-libs \
     rsync \
     zlib-dev \
+    libstdc++ \
 # Install PECL and PEAR extensions
   && pecl install \
     imagick \
@@ -78,8 +78,20 @@ RUN apk add --no-cache --virtual .build-deps \
     zip \
 # Install composer
   && curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer \
-# Install laravel, PHP_CodeSniffer
+# Install PHP_CodeSniffer
   && composer global require "squizlabs/php_codesniffer=*" \
+# Install Node
+  && curl -fsSL --compressed -o node.tar.xz "https://unofficial-builds.nodejs.org/download/release/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64-musl.tar.xz" \
+  && mkdir -p /opt/node \
+  && tar -xJf "node.tar.xz" -C /opt/node --strip-components 1 --no-same-owner \
+  && rm -f "node.tar.xz" \
+# Install Yarn
+  && curl -fsSL --compressed -o yarn.tar.gz "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
+  && mkdir -p /opt/yarn \
+  && tar -xzf yarn.tar.gz -C /opt/yarn --strip-components 1 \
+  && ln -s /opt/yarn/bin/yarn /usr/local/bin/yarn \
+  && ln -s /opt/yarn/bin/yarnpkg /usr/local/bin/yarnpkg \
+  && rm yarn.tar.gz \
 # Cleanup dev dependencies
   && apk del -f .build-deps \
 # install bat
