@@ -1,11 +1,10 @@
-FROM php:alpine
+FROM php:fpm-alpine
 
 ENV COMPOSER_HOME /composer
 ENV PATH /opt/node/bin:/composer/vendor/bin:$PATH
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
 ARG NODE_VERSION=14.3.0
-ARG YARN_VERSION=1.22.4
 ARG bat_ver=0.15.1
 ARG diskus_ver=0.6.0
 ARG fd_ver=8.1.0
@@ -16,66 +15,65 @@ ARG starship_ver=0.41.3
 
 # Install dev dependencies
 RUN apk add --no-cache --virtual .build-deps \
-    $PHPIZE_DEPS \
-    curl-dev \
-    imagemagick-dev \
-    libtool \
-    libxml2-dev \
-    postgresql-dev \
-    sqlite-dev \
+      $PHPIZE_DEPS \
+      curl-dev \
+      imagemagick-dev \
+      libtool \
+      libxml2-dev \
+      postgresql-dev \
+      sqlite-dev \
 # Install production dependencies
   && apk add --no-cache \
-    bash \
-    curl \
-    freetype-dev \
-    g++ \
-    gcc \
-    git \
-    icu-dev \
-    icu-libs \
-    imagemagick \
-    libc-dev \
-    libjpeg-turbo-dev \
-    libpng-dev \
-    libzip-dev \
-    make \
-    mysql-client \
-    oniguruma-dev \
-    openssh-client \
-    postgresql-libs \
-    rsync \
-    zlib-dev \
-    libstdc++ \
+      bash \
+      curl \
+      freetype-dev \
+      g++ \
+      gcc \
+      git \
+      icu-dev \
+      icu-libs \
+      imagemagick \
+      libc-dev \
+      libjpeg-turbo-dev \
+      libpng-dev \
+      libzip-dev \
+      make \
+      mysql-client \
+      oniguruma-dev \
+      openssh-client \
+      postgresql-libs \
+      rsync \
+      zlib-dev \
 # Install PECL and PEAR extensions
   && pecl install \
-    imagick \
-    xdebug \
-    ast \
+      imagick \
+      xdebug \
+      ast \
 # Enable PECL and PEAR extensions
   && docker-php-ext-enable \
-    imagick \
-    xdebug \
-    ast \
+      imagick \
+      xdebug \
+      ast \
 # Configure php extensions
   && docker-php-ext-configure gd --with-freetype --with-jpeg \
 # Install php extensions
   && docker-php-ext-install \
-    bcmath \
-    calendar \
-    curl \
-    exif \
-    gd \
-    iconv \
-    intl \
-    mbstring \
-    pdo \
-    pdo_mysql \
-    pdo_pgsql \
-    pdo_sqlite \
-    pcntl \
-    tokenizer \
-    xml \
-    zip \
+      bcmath \
+      calendar \
+      curl \
+      exif \
+      gd \
+      iconv \
+      intl \
+      mbstring \
+      pdo \
+      pdo_mysql \
+      pdo_pgsql \
+      pdo_sqlite \
+      pcntl \
+      tokenizer \
+      xml \
+      zip \
 # Install composer
   && curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer \
 # Install PHP_CodeSniffer
@@ -83,19 +81,12 @@ RUN apk add --no-cache --virtual .build-deps \
 # Install Node
   && curl -fsSL --compressed -o node.tar.xz "https://unofficial-builds.nodejs.org/download/release/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64-musl.tar.xz" \
   && mkdir -p /opt/node \
-  && tar -xJf "node.tar.xz" -C /opt/node --strip-components 1 --no-same-owner \
+  && tar -xJf node.tar.xz -C /opt/node --wildcards "*/*/*" --strip-components 1 --no-same-owner \
   && node --version \
-  && rm -f "node.tar.xz" \
-# Install Yarn
-  && curl -fsSL --compressed -o yarn.tar.gz "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
-  && mkdir -p /opt/yarn \
-  && tar -xzf yarn.tar.gz -C /opt/yarn --strip-components 1 \
-  && ln -s /opt/yarn/bin/yarn /opt/node/bin/yarn \
-  && ln -s /opt/yarn/bin/yarnpkg /opt/node/bin/yarnpkg \
-  && yarn --version \
-  && rm yarn.tar.gz \
+  && rm -f node.tar.xz \
 # Install typescript
-  && yarn global add typescript \
+  && npm install -g typescript \
+  && tsc --version \
 # Cleanup dev dependencies
   && apk del -f .build-deps \
 # Install bat
